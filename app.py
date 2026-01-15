@@ -21,7 +21,7 @@ def load_data():
     query = """
     SELECT *
     FROM cdr.galaxy_in_icc_export
-    limit 1000
+    limit 10
     """
     return pd.read_sql(query, engine)
 
