@@ -12,21 +12,26 @@ host = "42.1.65.59"
 port = 9030
 database = "bss"
 
-engine = create_engine(
-    f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}"
-)
+@st.cache_resource
+def get_engine():
+    return create_engine(
+        f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}",
+        pool_pre_ping=True
+    )
 
 @st.cache_data(ttl=600)
 def load_data():
+    engine = get_engine()
     query = """
-    SELECT *
-    FROM cdr.galaxy_in_icc_export
-    limit 10
+        SELECT *
+        FROM cdr.galaxy_in_icc_export
+        LIMIT 10
     """
     return pd.read_sql(query, engine)
 
 st.title("CDR Data Table")
 
-df = load_data()
+with st.spinner("Loading data..."):
+    df = load_data()
 
 st.dataframe(df, use_container_width=True)
